@@ -4,12 +4,12 @@ using System.Text;
 
 class Program
 {
-    static void Main()
+    private static void Main()
     {
         while (true)
         {
-            Console.WriteLine("Enter 'normal' for regular calculations or 'derivatives' for finding derivatives. Type 'exit' to quit.");
-            string mode = Console.ReadLine().Trim().ToLower();
+            Console.WriteLine("enter 'normal' for regular calculations or 'derivatives' for finding derivatives. type 'exit' to quit");
+            var mode = Console.ReadLine().Trim().ToLower();
 
             if (mode == "exit")
                 break;
@@ -17,19 +17,19 @@ class Program
             switch (mode)
             {
                 case "normal":
-                    Console.WriteLine("Enter your equation:");
-                    string equation = Console.ReadLine();
+                    Console.WriteLine("enter your equation:");
+                    var equation = Console.ReadLine();
                     var allTokens = Tokenize(equation);
                     var rpnInput = ShuntingYard(allTokens);
                     var result = Calculate(rpnInput);
-                    Console.WriteLine("Result: " + result);
+                    Console.WriteLine("result: " + result);
                     break;
                 case "derivatives":
-                    Console.WriteLine("Derivative feature not implemented yet.");
-                    // Implementation for derivatives will go here.
+                    Console.WriteLine("derivative feature not implemented yet");
+                    // place for calculus
                     break;
                 default:
-                    Console.WriteLine("Invalid mode selected. Please choose 'normal' or 'derivatives'.");
+                    Console.WriteLine("invalid mode selected. choose 'normal' or 'derivatives'");
                     break;
             }
         }
@@ -105,10 +105,10 @@ class Program
             }
             else if (token.IsOperator())
             {
-                double num2 = stack.Pop();
-                double num1 = stack.Pop();
+                var num2 = stack.Pop();
+                var num1 = stack.Pop();
 
-                double localResult = token switch
+                var localResult = token switch
                 {
                     "+" => num1 + num2,
                     "-" => num1 - num2,
