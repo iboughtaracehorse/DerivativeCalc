@@ -29,7 +29,7 @@ class Program
                     }
                     break;
                 
-                case "derivatives":
+                case "d":
                     var toDifferentiate = Console.ReadLine();
                     
                     if (toDifferentiate != null)
@@ -53,11 +53,11 @@ class Program
         var token = new StringBuilder();
         foreach (var ch in input)
         {
-            if (char.IsDigit(ch) || ch == '.' || ch == 'x')
+            if (char.IsDigit(ch) || ch == '.' || ch == 'x' || ch == '^')
             {
                 token.Append(ch);
             }
-            else if (ch.IsOperator() || ch == '^') 
+            else if (ch.IsOperator())
             {
                 if (token.Length > 0)
                 {
@@ -108,38 +108,45 @@ class Program
 
     static List<string> Differentiate(List<string> tokens)
     {
-        var newTokens = new List<string>(); // future result
+        var newTokens = new List<string>();
+        var newToken = "";
+        var stack = new Stack<string>();
+        var c = "";
 
         foreach (var token in tokens)
         {
-            if (token == "x") // everything was 1 before
+            if (token.IsNumber()) 
             {
-                newTokens.Add("1"); 
-            }
+                stack.Push(token);
+            } 
+            
             else if (token.Contains("x^"))
             {
-                var splitted = token.Split("x"); // smth like x and power
+                var splitted = token.Split("^");
                 var power = int.Parse(splitted[1]);
                 var newPower = power - 1;
-                var newToken = (power * int.Parse(splitted[0])).ToString(); 
-                
-                switch (newPower) //this is becoming crazy
+
+                if (stack.Count > 0)
                 {
-                    case 1:
-                        newToken += "*x";
-                        break;
-                    
-                    case > 1:
-                        newToken += "*x^" + newPower;
-                        break;
+                    c = stack.Pop();
                 }
+                
+                if (newPower > 1)
+                {
+                    newToken = $"{c}{power}*x^{newPower}";
+                }
+                else
+                {
+                    newToken = $"{c}{power}*x";
+                }
+
                 newTokens.Add(newToken);
             }
             else
             {
-                newTokens.Add(token.Replace("x", ""));
+                newTokens.Add(stack.Pop());
             }
-            
+
             if (token.IsOperator())
             {
                 newTokens.Add(token);
@@ -148,6 +155,7 @@ class Program
 
         return newTokens;
     }
+
 
     static double Calculate(List<string> rpnTokens)
     {
