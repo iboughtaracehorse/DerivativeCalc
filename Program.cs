@@ -25,8 +25,10 @@ class Program
                     Console.WriteLine("result: " + result);
                     break;
                 case "derivatives":
-                    Console.WriteLine("derivative feature not implemented yet");
-                    // place for calculus
+                    var toDifferentiate = Console.ReadLine();
+                    var dTokens = Tokenize(toDifferentiate);
+                    var dResult = Differentiate(dTokens);
+                    Console.WriteLine("derivative: " + string.Join("", dResult));
                     break;
                 default:
                     Console.WriteLine("invalid mode selected. choose 'normal' or 'derivatives'");
@@ -35,13 +37,13 @@ class Program
         }
     }
 
-    static List<string> Tokenize(string input)
+    private static List<string> Tokenize(string input)
     {
         var tokens = new List<string>();
         var token = new StringBuilder();
         foreach (var ch in input)
         {
-            if (char.IsDigit(ch) || ch == '.')
+            if (char.IsDigit(ch) || ch == '.' || ch == 'x')
             {
                 token.Append(ch);
             }
@@ -91,6 +93,28 @@ class Program
         }
 
         return new List<string>(outputQueue);
+    }
+
+
+    static List<string> Differentiate(List<string> tokens)
+    {
+        var newTokens = new List<string>(); // future result
+
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+
+            if (token.Contains('x'))
+            {
+                newTokens.Add("1"); 
+            }
+            else if (token.IsOperator())
+            {
+                newTokens.Add(token);
+            }
+        }
+
+        return newTokens;
     }
 
     static double Calculate(List<string> rpnTokens)
