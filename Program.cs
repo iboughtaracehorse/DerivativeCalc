@@ -109,53 +109,41 @@ class Program
     static List<string> Differentiate(List<string> tokens)
     {
         var newTokens = new List<string>();
-        var newToken = "";
-        var stack = new Stack<string>();
-        var c = "";
 
         foreach (var token in tokens)
         {
-            if (token.IsNumber()) 
+            if (token.Contains("x^"))
             {
-                stack.Push(token);
-            } 
-            
-            else if (token.Contains("x^"))
-            {
-                var splitted = token.Split("^");
-                var power = int.Parse(splitted[1]);
+                var splitted = token.Split("x");
+                var coefficient = splitted[0].Length > 0 ? splitted[0] : "1";
+                var power = int.Parse(splitted[1].Substring(1));
                 var newPower = power - 1;
-
-                if (stack.Count > 0)
-                {
-                    c = stack.Pop();
-                }
                 
                 if (newPower > 1)
                 {
-                    newToken = $"{c}{power}*x^{newPower}";
+                    var newToken = $"{coefficient}*{power}*x^{newPower}";
+                    newTokens.Add(newToken);
                 }
                 else
                 {
-                    newToken = $"{c}{power}*x";
+                    var newToken = $"{coefficient}*{power}*x";
+                    newTokens.Add(newToken);
                 }
-
-                newTokens.Add(newToken);
             }
-            else
+            else if (token.IsNumber()) 
             {
-                newTokens.Add(stack.Pop());
-            }
-
-            if (token.IsOperator())
+                newTokens.Add("0");
+            } 
+            
+            else if (token.IsOperator())
             {
                 newTokens.Add(token);
             }
+           
         }
 
         return newTokens;
     }
-
 
     static double Calculate(List<string> rpnTokens)
     {
