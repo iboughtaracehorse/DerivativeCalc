@@ -19,17 +19,27 @@ class Program
                 case "normal":
                     Console.WriteLine("enter your equation:");
                     var equation = Console.ReadLine();
-                    var allTokens = Tokenize(equation);
-                    var rpnInput = ShuntingYard(allTokens);
-                    var result = Calculate(rpnInput);
-                    Console.WriteLine("result: " + result);
+                    
+                    if (equation != null)
+                    {
+                        var allTokens = Tokenize(equation);
+                        var rpnInput = ShuntingYard(allTokens);
+                        var result = Calculate(rpnInput);
+                        Console.WriteLine("result: " + result);
+                    }
                     break;
+                
                 case "derivatives":
                     var toDifferentiate = Console.ReadLine();
-                    var dTokens = Tokenize(toDifferentiate);
-                    var dResult = Differentiate(dTokens);
-                    Console.WriteLine("derivative: " + string.Join("", dResult));
+                    
+                    if (toDifferentiate != null)
+                    {
+                        var dTokens = Tokenize(toDifferentiate);
+                        var dResult = Differentiate(dTokens);
+                        Console.WriteLine("derivative: " + string.Join("", dResult));
+                    }
                     break;
+                
                 default:
                     Console.WriteLine("invalid mode selected. choose 'normal' or 'derivatives'");
                     break;
@@ -47,7 +57,7 @@ class Program
             {
                 token.Append(ch);
             }
-            else if (ch.IsOperator())
+            else if (ch.IsOperator() || ch == '^') 
             {
                 if (token.Length > 0)
                 {
@@ -100,15 +110,37 @@ class Program
     {
         var newTokens = new List<string>(); // future result
 
-        for (var i = 0; i < tokens.Count; i++)
+        foreach (var token in tokens)
         {
-            var token = tokens[i];
-
-            if (token.Contains('x'))
+            if (token == "x") // everything was 1 before
             {
                 newTokens.Add("1"); 
             }
-            else if (token.IsOperator())
+            else if (token.Contains("x^"))
+            {
+                var splitted = token.Split("x"); // smth like x and power
+                var power = int.Parse(splitted[1]);
+                var newPower = power - 1;
+                var newToken = (power * int.Parse(splitted[0])).ToString(); 
+                
+                switch (newPower) //this is becoming crazy
+                {
+                    case 1:
+                        newToken += "*x";
+                        break;
+                    
+                    case > 1:
+                        newToken += "*x^" + newPower;
+                        break;
+                }
+                newTokens.Add(newToken);
+            }
+            else
+            {
+                newTokens.Add(token.Replace("x", ""));
+            }
+            
+            if (token.IsOperator())
             {
                 newTokens.Add(token);
             }
