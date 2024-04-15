@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
-class Program
+namespace DerivativeCalcP;
+
+internal static class Program
 {
     private static void Main()
     {
         while (true)
         {
             Console.WriteLine("enter 'normal' for regular calculations or 'derivatives' for finding derivatives. type 'exit' to quit");
-            var mode = Console.ReadLine().Trim().ToLower();
+            var mode = Console.ReadLine()?.Trim().ToLower();
 
             if (mode == "exit")
                 break;
@@ -29,7 +29,8 @@ class Program
                     }
                     break;
                 
-                case "d":
+                case "derivatives":
+                    Console.WriteLine("enter your equation (eg. 7+2x^4) no spaces are allowed: ");
                     var toDifferentiate = Console.ReadLine();
                     
                     if (toDifferentiate != null)
@@ -65,6 +66,10 @@ class Program
                     token.Clear();
                 }
                 tokens.Add(ch.ToString());
+            }
+            else if (ch == ' ')
+            {
+                throw new Exception("NO SPACES ARE ALLOWED");
             }
         }
 
@@ -132,12 +137,15 @@ class Program
             }
             else if (token.IsNumber()) 
             {
-                newTokens.Add("0");
+                newTokens.Add("");
             } 
             
             else if (token.IsOperator())
             {
-                newTokens.Add(token);
+                if (newTokens.Count == 0 || newTokens[^1] != "")
+                {
+                    newTokens.Add(token);
+                }
             }
            
         }
