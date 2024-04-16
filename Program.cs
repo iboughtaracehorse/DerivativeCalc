@@ -8,7 +8,8 @@ internal static class Program
     {
         while (true)
         {
-            Console.WriteLine("enter 'normal' for regular calculations or 'derivatives' for finding derivatives. type 'exit' to quit");
+            Console.WriteLine(
+                "enter 'normal' for regular calculations or 'derivatives' for finding derivatives. type 'exit' to quit");
             var mode = Console.ReadLine()?.Trim().ToLower();
 
             if (mode == "exit")
@@ -19,7 +20,7 @@ internal static class Program
                 case "normal":
                     Console.WriteLine("enter your equation:");
                     var equation = Console.ReadLine();
-                    
+
                     if (equation != null)
                     {
                         var allTokens = Tokenize(equation);
@@ -27,26 +28,41 @@ internal static class Program
                         var result = Calculate(rpnInput);
                         Console.WriteLine("result: " + result);
                     }
+
                     break;
-                
+
                 case "derivatives":
                     Console.WriteLine("enter your equation (eg. 7+2x^4) no spaces are allowed: ");
                     var toDifferentiate = Console.ReadLine();
-                    
+
                     if (toDifferentiate != null)
                     {
                         var dTokens = Tokenize(toDifferentiate);
                         var dResult = Differentiate(dTokens);
                         Console.WriteLine("derivative: " + string.Join("", dResult));
+
+                        Console.WriteLine("enter x value:");
+                        var xValueStr = Console.ReadLine();
+                        if (double.TryParse(xValueStr, out var xValue))
+                        {
+                            var equationStr = string.Join("", dResult);
+                            var toCalculate = equationStr.Replace("x", xValueStr);
+                            var equationRpn = ShuntingYard(TokenizeForDerivatives(toCalculate));
+                            var resultD = Calculate(equationRpn);
+                            Console.WriteLine("at x = " + xValue + ": " + resultD);
+                        }
                     }
+
                     break;
-                
+
                 default:
                     Console.WriteLine("invalid mode selected. choose 'normal' or 'derivatives'");
                     break;
             }
         }
     }
+
+    /**************************************************************************/
 
     private static List<string> Tokenize(string input)
     {
@@ -65,6 +81,7 @@ internal static class Program
                     tokens.Add(token.ToString());
                     token.Clear();
                 }
+
                 tokens.Add(ch.ToString());
             }
             else if (ch == ' ')
@@ -80,6 +97,44 @@ internal static class Program
 
         return tokens;
     }
+
+    /**************************************************************************/
+
+    private static List<string> TokenizeForDerivatives(string input)
+    {
+        var tokens = new List<string>();
+        var token = new StringBuilder();
+        foreach (var ch in input)
+        {
+            if (char.IsDigit(ch) || ch == '.' || ch == 'x')
+            {
+                token.Append(ch);
+            }
+            else if (ch.IsOperator() || ch == '^')
+            {
+                if (token.Length > 0)
+                {
+                    tokens.Add(token.ToString());
+                    token.Clear();
+                }
+
+                tokens.Add(ch.ToString());
+            }
+            else if (ch == ' ')
+            {
+                throw new Exception("NO SPACES ARE ALLOWED");
+            }
+        }
+
+        if (token.Length > 0)
+        {
+            tokens.Add(token.ToString());
+        }
+
+        return tokens;
+    }
+
+    /**************************************************************************/
 
     static List<string> ShuntingYard(List<string> tokens)
     {
@@ -98,6 +153,7 @@ internal static class Program
                 {
                     outputQueue.Enqueue(operators.Pop());
                 }
+
                 operators.Push(token);
             }
         }
@@ -110,6 +166,7 @@ internal static class Program
         return new List<string>(outputQueue);
     }
 
+    /**************************************************************************/
 
     static List<string> Differentiate(List<string> tokens)
     {
@@ -123,7 +180,7 @@ internal static class Program
                 var coefficient = splitted[0].Length > 0 ? splitted[0] : "1";
                 var power = int.Parse(splitted[1].Substring(1));
                 var newPower = power - 1;
-                
+
                 if (newPower > 1)
                 {
                     var newToken = $"{coefficient}*{power}*x^{newPower}";
@@ -135,11 +192,11 @@ internal static class Program
                     newTokens.Add(newToken);
                 }
             }
-            else if (token.IsNumber()) 
+            else if (token.IsNumber())
             {
                 newTokens.Add("");
-            } 
-            
+            }
+
             else if (token.IsOperator())
             {
                 if (newTokens.Count == 0 || newTokens[^1] != "")
@@ -147,11 +204,12 @@ internal static class Program
                     newTokens.Add(token);
                 }
             }
-           
         }
 
         return newTokens;
     }
+
+    /**************************************************************************/
 
     static double Calculate(List<string> rpnTokens)
     {
@@ -163,25 +221,29 @@ internal static class Program
             {
                 stack.Push(double.Parse(token));
             }
+
             else if (token.IsOperator())
             {
                 var num2 = stack.Pop();
                 var num1 = stack.Pop();
 
-                var localResult = token switch
+                var result = token switch
                 {
                     "+" => num1 + num2,
                     "-" => num1 - num2,
                     "*" => num1 * num2,
                     "/" => num1 / num2,
+                    "^" => Math.Pow(num1, num2),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-                stack.Push(localResult);
+                stack.Push(result);
             }
         }
 
         return stack.Pop();
     }
+
+/**************************************************************************/
 }
 
 internal static class Helpers
@@ -192,6 +254,7 @@ internal static class Helpers
         { '-', 1 },
         { '*', 2 },
         { '/', 2 },
+        { '^', 3 },
     };
 
     public static bool IsOperator(this char @char) => Priority.ContainsKey(@char);
